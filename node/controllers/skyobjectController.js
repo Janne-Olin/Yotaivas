@@ -15,20 +15,20 @@ module.exports = {
         }
     },
 
-    // insert: async (req, res) => {
-    //     try {
-    //         const {kohde_id, pvm, valine, paikka, selite} = req.body;
+    insert: async (req, res) => {
+        try {
+            const {name, alias, typeid} = req.body;
 
-    //         let result = await sql.insert({kohde_id, pvm, valine, paikka, selite});
-    //         let h = await sql.fetch(result.insertId);
+            let result = await sql.insert({name, alias, typeid});
+            let k = await sql.fetch(result.insertId);
 
-    //         res.statusCode = 201;
-    //         res.json(h);
-    //     }
-    //     catch (err) {
-    //         utils.createErrorMessage(res, "Virhe: " + err.message);
-    //     }
-    // },
+            res.statusCode = 201;
+            res.json(k);
+        }
+        catch (err) {
+            utils.createErrorMessage(res, "Virhe: " + err.message);
+        }
+    },
 
     // update: async (req, res) => {
     //     try {

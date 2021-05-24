@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
 
 export const Observations = () => {
     const [doFetch, setDoFetch] = useState(true);
@@ -40,13 +40,15 @@ const ObservationsTable = (props) => {
                 <td>{o.valine}</td>
                 <td>{o.paikka}</td>
                 <td>{o.selite}</td>
+                <td><Button variant="link">Muokkaa</Button></td>
+                <td><Button variant="link">Poista</Button></td>
             </tr>
         );
     });
 
     return (
         <div>
-            <table>
+            <Table>
                 <thead>
                     <tr>
                         <th>Kohde</th>
@@ -54,12 +56,14 @@ const ObservationsTable = (props) => {
                         <th>Väline</th>
                         <th>Paikka</th>
                         <th>Selite</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {data}
                 </tbody>
-            </table>
+            </Table>
         </div>
     );
 }

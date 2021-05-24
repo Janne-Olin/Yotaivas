@@ -14,11 +14,11 @@ const fetchObject = (id) => {
     return utils.executeSQL(query, [id]);
 }
 
-// const insertObservation = ({kohde_id, pvm, valine, paikka, selite}) => {
-//     let query = "INSERT INTO havainto (kohde_id, pvm, valine, paikka, selite) VALUES (?, ?, ?, ?, ?)";
+const insertObject = ({name, alias, typeid}) => {
+    let query = "INSERT INTO kohde (nimi, alias, tyyppi_id) VALUES (?, ?, ?)";
 
-//     return utils.executeSQL(query, [kohde_id, pvm, valine, paikka, selite]);
-// }
+    return utils.executeSQL(query, [name, alias, typeid]);
+}
 
 // const updateObservation = ({kohde_id, pvm, valine, paikka, selite}, id) => {
 //     let query = "UPDATE  havainto SET kohde_id=?, pvm=?, valine=?, paikka=?, selite=? WHERE id = ?";
@@ -32,9 +32,9 @@ module.exports = {
         return fetchObject(id);
     },
 
-    // insert : ({kohde_id, pvm, valine, paikka, selite}) => {
-    //     return insertObservation({kohde_id, pvm, valine, paikka, selite});
-    // },
+    insert : ({name, alias, typeid}) => {
+        return insertObject({name, alias, typeid});
+    },
 
     // update : ({kohde_id, pvm, valine, paikka, selite}, id) => {
     //     return updateObservation({kohde_id, pvm, valine, paikka, selite}, id);

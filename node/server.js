@@ -19,8 +19,10 @@ app.use(cors);
 
 const observationRoutes = require('./routes/observationRoutes');
 const skyobjectRoutes = require('./routes/skyobjectRoutes');
+const typeRoutes = require('./routes/typeRoutes');
 app.use(observationRoutes);
 app.use(skyobjectRoutes);
+app.use(typeRoutes);
 
 app.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
