@@ -15,6 +15,19 @@ module.exports = {
         }
     },
 
+    fetchSingleObject: async (req, res) => {
+        try {
+            let id = req.params.id;
+
+            let k = await sql.fetch(id);
+            res.statusCode = 200;
+            res.json({status: "OK", kohde: k});
+        }
+        catch (err) {
+            utils.createErrorMessage(res, "Virhe: " + err.message);
+        }
+    },
+
     insert: async (req, res) => {
         try {
             const {name, alias, typeid} = req.body;
@@ -30,26 +43,26 @@ module.exports = {
         }
     },
 
-    // update: async (req, res) => {
-    //     try {
-    //         const {kohde_id, pvm, valine, paikka, selite} = req.body;
-    //         const id = req.params.id;
+    update: async (req, res) => {
+        try {
+            const {name, alias, typeid} = req.body;
+            const id = req.params.id;
 
-    //         let result = await sql.update({kohde_id, pvm, valine, paikka, selite}, id);
+            let result = await sql.update({name, alias, typeid}, id);
 
-    //         if ( result.affectedRows > 0){
-    //             res.statusCode = 204;
-    //             res.json()
-    //         }
-    //         else {
-    //             res.statusCode = 404;
-    //             res.json()
-    //         }
-    //     }
-    //     catch(err){
-    //         utils.createErrorMessage(res, "Virhe: " + err.message);
-    //     }
-    // },
+            if ( result.affectedRows > 0){
+                res.statusCode = 204;
+                res.json()
+            }
+            else {
+                res.statusCode = 404;
+                res.json()
+            }
+        }
+        catch(err){
+            utils.createErrorMessage(res, "Virhe: " + err.message);
+        }
+    },
 
     // delete: async (req, res) => {
     //     try {

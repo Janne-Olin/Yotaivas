@@ -2,7 +2,7 @@ const utils = require('./utils/dbutils');
 
 const fetchObject = (id) => {    
 
-    let query = "SELECT k.nimi AS kohde, k.alias, t.nimi AS tyyppi FROM kohde k";
+    let query = "SELECT k.id, k.nimi AS kohde, k.alias, k.tyyppi_id, t.nimi AS tyyppi FROM kohde k";
     query += " INNER JOIN kohdetyyppi t ON k.tyyppi_id = t.id WHERE 1=1";
 
     if (id) {
@@ -20,11 +20,11 @@ const insertObject = ({name, alias, typeid}) => {
     return utils.executeSQL(query, [name, alias, typeid]);
 }
 
-// const updateObservation = ({kohde_id, pvm, valine, paikka, selite}, id) => {
-//     let query = "UPDATE  havainto SET kohde_id=?, pvm=?, valine=?, paikka=?, selite=? WHERE id = ?";
+const updateObject = ({name, alias, typeid}, id) => {
+    let query = "UPDATE kohde SET nimi=?, alias=?, tyyppi_id=? WHERE id = ?";
 
-//     return utils.executeSQL(query, [kohde_id, pvm, valine, paikka, selite, id]);
-// }
+    return utils.executeSQL(query, [name, alias, typeid, id]);
+}
 
 module.exports = {
 
@@ -36,7 +36,7 @@ module.exports = {
         return insertObject({name, alias, typeid});
     },
 
-    // update : ({kohde_id, pvm, valine, paikka, selite}, id) => {
-    //     return updateObservation({kohde_id, pvm, valine, paikka, selite}, id);
-    // }
+    update : ({name, alias, typeid}, id) => {
+        return updateObject({name, alias, typeid}, id);
+    }
 }

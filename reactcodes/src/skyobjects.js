@@ -6,14 +6,26 @@ export const SkyObjects = () => {
     const [doFetch, setDoFetch] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [objectToBeInserted, setObjectToBeInserted] = useState(null);
+    const [objectToBeModified, setObjectToBeModified] = useState(null);
+    const [objectToBeUpdated, setObjectToBeUpdated] = useState(null);
+    const [modifyId, setModifyId] = useState(-1);
 
-    const SaveClicked = (name, alias, typeid) => {
-        setShowForm(false);
-        setObjectToBeInserted({name, alias, typeid});
+    const SaveClicked = (name, alias, typeid, object) => {
+        if (object) {
+            let id = object.id;
+            setObjectToBeUpdated({id, name, alias, typeid});
+        }
+        else {
+            setObjectToBeInserted({name, alias, typeid});
+        }
     }
 
     const CancelClicked = () => {
         setShowForm(false);
+    }
+
+    const OnEdit = (id) => {
+        setModifyId(id);
     }
 
     useEffect(() => {
@@ -57,14 +69,57 @@ export const SkyObjects = () => {
         }
     }, [objectToBeInserted])
 
+    useEffect(() => {
+        const fetchObject = async () => {
+            let r = await fetch("http://localhost:3002/api/kohde/" + modifyId);
+            let data = await r.json();            
+
+            setObjectToBeModified(data.kohde[0]);
+        }
+
+        if (modifyId > 0) {
+            fetchObject();
+            setShowForm(true);
+            setModifyId(-1);
+        }
+
+    }, [modifyId]);
+
+    useEffect(() => {
+        const updateObject = async () => {
+            const r = await fetch("http://localhost:3002/api/kohde/" + objectToBeUpdated.id, {
+                method: "PUT",
+                headers : {
+                    'Content-type' : 'application/json'
+                },
+                body : JSON.stringify({name: objectToBeUpdated.name, alias: objectToBeUpdated.alias, 
+                    typeid: objectToBeUpdated.typeid})
+            });
+
+            if ( r.status == 204 ){
+                setShowForm(false);
+                setDoFetch(true);
+                setObjectToBeModified(null);
+            }
+            else {
+                let response = await r.json();
+            }
+        }
+
+        if (objectToBeUpdated) {
+            updateObject();
+        }
+    }, [objectToBeUpdated]);
+
+
     return (
         <div>
             <Button variant="secondary" onClick={() => setShowForm(true)}>Lisää uusi kohde</Button>
 
-            <ObjectsTable objects={objects}/>
+            <ObjectsTable objects={objects} OnEdit={OnEdit}/>
 
             {
-                showForm ? <ObjectForm SaveClicked={SaveClicked} CancelClicked={CancelClicked}/> : null
+                showForm ? <ObjectForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} object={objectToBeModified}/> : null
             }
         </div>
     );
@@ -79,7 +134,7 @@ const ObjectsTable = (props) => {
                 <td>{o.kohde}</td>
                 <td>{o.alias ? o.alias : ""}</td>
                 <td>{o.tyyppi}</td>
-                <td><Button variant="link">Muokkaa</Button></td>
+                <td><Button variant="link" onClick={() => props.OnEdit(o.id)}>Muokkaa</Button></td>
                 <td><Button variant="link">Poista</Button></td>
                 <td><Button variant="link">Lisää havainto</Button></td>
             </tr>
@@ -108,6 +163,8 @@ const ObjectsTable = (props) => {
 }
 
 const ObjectForm = (props) => {
+    const object = props.object;
+
     const [types, setTypes] = useState([]);
     const [name, setName] = useState("");
     const [alias, setAlias] = useState("");
@@ -125,6 +182,14 @@ const ObjectForm = (props) => {
 
         fetchTypes();
     }, []);
+
+    useEffect(() => {
+        if (object) {
+            setName(object.kohde);
+            setAlias(object.alias);
+            setTypeid(object.tyyppi_id);
+        }
+    }, [object]);
 
     const objectTypes = types.map((t, i) => {
         return (
@@ -147,8 +212,8 @@ const ObjectForm = (props) => {
                     </Form.Group>
 
                     <Form.Group>
-                        <Form.Label type="text" value={alias} onChange={(e) => setAlias(e.target.value)}>Alias</Form.Label>
-                        <Form.Control/>
+                        <Form.Label>Alias</Form.Label>
+                        <Form.Control type="text" value={alias} onChange={(e) => setAlias(e.target.value)}/>
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Tyyppi</Form.Label>
@@ -161,7 +226,7 @@ const ObjectForm = (props) => {
 
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => props.CancelClicked()}>Sulje</Button>
-                <Button variant="primary" onClick={() => props.SaveClicked(name, alias, typeid)}>Tallenna</Button>
+                <Button variant="primary" onClick={() => props.SaveClicked(name, alias, typeid, object)}>Tallenna</Button>
             </Modal.Footer>
         </Modal>
     )
