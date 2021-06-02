@@ -10,6 +10,7 @@ router.route('/api/kohde').
 
 router.route('/api/kohde/:id').
     get(ctrl.fetchSingleObject).
-    put(ctrl.update);
+    put(ctrl.update).
+    delete(ctrl.delete);
 
 module.exports = router;

@@ -9,6 +9,7 @@ export const SkyObjects = () => {
     const [objectToBeModified, setObjectToBeModified] = useState(null);
     const [objectToBeUpdated, setObjectToBeUpdated] = useState(null);
     const [modifyId, setModifyId] = useState(-1);
+    const [deleteId, setDeleteId] = useState(-1);
 
     const SaveClicked = (name, alias, typeid, object) => {
         if (object) {
@@ -111,12 +112,27 @@ export const SkyObjects = () => {
         }
     }, [objectToBeUpdated]);
 
+    useEffect(() => {
+        const deleteObject = async () => {
+            const r = await fetch("http://localhost:3002/api/kohde/" + deleteId, {
+                method: "DELETE"
+            });
+
+            setDeleteId(-1);
+            setDoFetch(true);
+        }
+
+        if (deleteId > 0) {
+            deleteObject();           
+        }
+    }, [deleteId]);
+
 
     return (
         <div>
             <Button variant="secondary" onClick={() => setShowForm(true)}>Lisää uusi kohde</Button>
 
-            <ObjectsTable objects={objects} OnEdit={OnEdit}/>
+            <ObjectsTable objects={objects} OnEdit={OnEdit} setDeleteId={setDeleteId}/>
 
             {
                 showForm ? <ObjectForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} object={objectToBeModified}/> : null
@@ -135,7 +151,7 @@ const ObjectsTable = (props) => {
                 <td>{o.alias ? o.alias : ""}</td>
                 <td>{o.tyyppi}</td>
                 <td><Button variant="link" onClick={() => props.OnEdit(o.id)}>Muokkaa</Button></td>
-                <td><Button variant="link">Poista</Button></td>
+                <td><Button variant="link" onClick={() => props.setDeleteId(o.id)}>Poista</Button></td>
                 <td><Button variant="link">Lisää havainto</Button></td>
             </tr>
         );

@@ -64,27 +64,19 @@ module.exports = {
         }
     },
 
-    // delete: async (req, res) => {
-    //     try {
-    //         const avain = req.params.avain;
+    delete: async (req, res) => {
+        try {
+            const id = req.params.id;
 
-    //         // Tarkistetaan löytyykö asiakkaalle toimitettuja tilauksia
-    //         let orderRows = await orderSql.fetchOrderRowsByCustomer(avain, 1);
-    //         if ( orderRows.length > 0 )
-    //         {
-    //             utils.createErrorMessage(res, "Asiakasta ei voi poistaa, koska siihen liittyy toimitettu tilausrivi", orderRows)
-    //             return;
-    //         }
+            let result = await sql.delete(id);
 
-    //         let result = await sql.deleteCustomers(avain);
-
-    //         res.statusCode = 204;
-    //         res.json()
-    //     }
-    //     catch(err){
-    //         utils.createErrorMessage(res, "Virhe: " + err.message);
-    //     }
-    // },
+            res.statusCode = 204;
+            res.json()
+        }
+        catch(err){
+            utils.createErrorMessage(res, "Virhe: " + err.message);
+        }
+    },
 
 
 }

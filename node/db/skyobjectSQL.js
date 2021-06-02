@@ -26,6 +26,12 @@ const updateObject = ({name, alias, typeid}, id) => {
     return utils.executeSQL(query, [name, alias, typeid, id]);
 }
 
+const deleteObject = (id) => {
+    let query = "DELETE FROM kohde WHERE id = ?";
+
+    return utils.executeSQL(query, [id]);
+}
+
 module.exports = {
 
     fetch : (id) => {
@@ -38,5 +44,9 @@ module.exports = {
 
     update : ({name, alias, typeid}, id) => {
         return updateObject({name, alias, typeid}, id);
+    },
+
+    delete : (id) => {
+        return deleteObject(id);
     }
 }
