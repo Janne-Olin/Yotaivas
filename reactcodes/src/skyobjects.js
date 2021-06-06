@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Modal, Form, Alert } from 'react-bootstrap';
+import { Button, Table, Modal, Form } from 'react-bootstrap';
+import { Error } from './error.js';
 
 export const SkyObjects = () => {
     const [objects, setObjects] = useState([]);
@@ -68,10 +69,9 @@ export const SkyObjects = () => {
         }        
 
         if (objectToBeInserted) {
-            console.log(objectToBeInserted);
             insertObject();
         }
-    }, [objectToBeInserted])
+    }, [objectToBeInserted]);
 
     useEffect(() => {
         const fetchObject = async () => {
@@ -141,7 +141,7 @@ export const SkyObjects = () => {
             {
                 showForm ? <ObjectForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} object={objectToBeModified}/> : null
             }
-             {
+            {
                 error ? <Error message={error} setError={setError} /> : null
             }
         </div>
@@ -224,7 +224,7 @@ const ObjectForm = (props) => {
     return (
         <Modal show={show} onHide={() => props.CancelClicked()}>
             <Modal.Header closeButton>
-                <Modal.Title>Lisää kohde</Modal.Title>
+                <Modal.Title>{object ? "Muokkaa kohdetta" : "Lisää uusi kohde"}</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
@@ -252,31 +252,5 @@ const ObjectForm = (props) => {
                 <Button variant="primary" onClick={() => props.SaveClicked(name, alias, typeid, object)}>{object ? "Tallenna muutos" : "Tallenna"}</Button>
             </Modal.Footer>
         </Modal>
-    )       
-    
-}
-
-const Error = (props) => {
-    const {message} = props;
-    const [show, setShow] = useState(true);
-
-    const handleClose = () => {
-        setShow(false);
-        props.setError(null);
-    } 
-
-    return (
-        <Modal size="sm" show={show} onHide={handleClose}>
-            <Modal.Header closeButton></Modal.Header>
-            <Modal.Body>
-                <Alert variant="warning" >
-                    <Alert.Heading>Virhe:</Alert.Heading>
-                    <p>
-                    {message}
-                    </p>
-                </Alert>
-            </Modal.Body>
-        </Modal>
-
-    )
+    ) 
 }

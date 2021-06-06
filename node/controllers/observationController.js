@@ -17,9 +17,12 @@ module.exports = {
 
     insert: async (req, res) => {
         try {
-            const {kohde_id, pvm, valine, paikka, selite} = req.body;
+            const {objectid, date, equipment, location, description} = req.body;
 
-            let result = await sql.insert({kohde_id, pvm, valine, paikka, selite});
+            const epoch_time_date = new Date(date).valueOf() / 1000;
+            console.log(epoch_time_date);
+
+            let result = await sql.insert({objectid, epoch_time_date, equipment, location, description});
             let h = await sql.fetch(result.insertId);
 
             res.statusCode = 201;
@@ -32,10 +35,14 @@ module.exports = {
 
     update: async (req, res) => {
         try {
-            const {kohde_id, pvm, valine, paikka, selite} = req.body;
+            const {objectid, date, equipment, location, description} = req.body;
             const id = req.params.id;
 
-            let result = await sql.update({kohde_id, pvm, valine, paikka, selite}, id);
+            const epoch_time_date = new Date(date).valueOf() / 1000;
+            console.log(epoch_time_date);
+
+
+            let result = await sql.update({objectid, epoch_time_date, equipment, location, description}, id);
 
             if ( result.affectedRows > 0){
                 res.statusCode = 204;
@@ -51,27 +58,19 @@ module.exports = {
         }
     },
 
-    // delete: async (req, res) => {
-    //     try {
-    //         const avain = req.params.avain;
+    delete: async (req, res) => {
+        try {
+            const id = req.params.id;
 
-    //         // Tarkistetaan löytyykö asiakkaalle toimitettuja tilauksia
-    //         let orderRows = await orderSql.fetchOrderRowsByCustomer(avain, 1);
-    //         if ( orderRows.length > 0 )
-    //         {
-    //             utils.createErrorMessage(res, "Asiakasta ei voi poistaa, koska siihen liittyy toimitettu tilausrivi", orderRows)
-    //             return;
-    //         }
+            let result = await sql.delete(id);
 
-    //         let result = await sql.deleteCustomers(avain);
-
-    //         res.statusCode = 204;
-    //         res.json()
-    //     }
-    //     catch(err){
-    //         utils.createErrorMessage(res, "Virhe: " + err.message);
-    //     }
-    // },
+            res.statusCode = 204;
+            res.json()
+        }
+        catch(err){
+            utils.createErrorMessage(res, "Virhe: " + err.message);
+        }
+    },
 
 
 }

@@ -9,6 +9,7 @@ router.route('/api/havainto').
     post(ctrl.insert);
 
 router.route('/api/havainto/:id').
-    put(ctrl.update);
+    put(ctrl.update).
+    delete(ctrl.delete);
 
 module.exports = router;
