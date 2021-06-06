@@ -1,6 +1,20 @@
 const sql = require('../db/skyobjectSQL');
 const utils = require('../db/utils/dbutils');
 
+const checkInputfieldsExists = (body) => {
+
+    const {name, typeid} = body;
+
+    let errors = [];
+    if (!name || name == "") errors.push("nimi");
+    if (!typeid || typeid < 0) errors.push("kohdetyyppi")
+
+    if (errors.length > 0)
+        return errors.join(",");
+    else
+        return null;
+}
+
 module.exports = {
 
 
@@ -30,6 +44,13 @@ module.exports = {
 
     insert: async (req, res) => {
         try {
+            const checkErrors = checkInputfieldsExists(req.body);
+
+            if (checkErrors) {
+                utils.createErrorMessage(res, "Pakollisia tietoja puuttuu: " + checkErrors);
+                return;
+            }
+
             const {name, alias, typeid} = req.body;
 
             let result = await sql.insert({name, alias, typeid});
@@ -45,6 +66,13 @@ module.exports = {
 
     update: async (req, res) => {
         try {
+            const checkErrors = checkInputfieldsExists(req.body);
+
+            if (checkErrors) {
+                utils.createErrorMessage(res, "Pakollisia tietoja puuttuu: " + checkErrors);
+                return;
+            }
+
             const {name, alias, typeid} = req.body;
             const id = req.params.id;
 

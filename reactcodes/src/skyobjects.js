@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Modal, Form } from 'react-bootstrap';
+import { Button, Table, Modal, Form, Alert } from 'react-bootstrap';
 
 export const SkyObjects = () => {
     const [objects, setObjects] = useState([]);
@@ -10,6 +10,7 @@ export const SkyObjects = () => {
     const [objectToBeUpdated, setObjectToBeUpdated] = useState(null);
     const [modifyId, setModifyId] = useState(-1);
     const [deleteId, setDeleteId] = useState(-1);
+    const [error, setError] = useState(null);
 
     const SaveClicked = (name, alias, typeid, object) => {
         if (object) {
@@ -23,6 +24,7 @@ export const SkyObjects = () => {
 
     const CancelClicked = () => {
         setShowForm(false);
+        setObjectToBeModified(null);
     }
 
     const OnEdit = (id) => {
@@ -60,7 +62,8 @@ export const SkyObjects = () => {
                 setDoFetch(true);
             }
             else {
-                let response = await r.json();                
+                let response = await r.json();  
+                setError(response.message);              
             }
         }        
 
@@ -104,6 +107,7 @@ export const SkyObjects = () => {
             }
             else {
                 let response = await r.json();
+                setError(response.message);
             }
         }
 
@@ -136,6 +140,9 @@ export const SkyObjects = () => {
 
             {
                 showForm ? <ObjectForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} object={objectToBeModified}/> : null
+            }
+             {
+                error ? <Error message={error} setError={setError} /> : null
             }
         </div>
     );
@@ -179,7 +186,7 @@ const ObjectsTable = (props) => {
 }
 
 const ObjectForm = (props) => {
-    const object = props.object;
+    const object = props.object;    
 
     const [types, setTypes] = useState([]);
     const [name, setName] = useState("");
@@ -242,10 +249,34 @@ const ObjectForm = (props) => {
 
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => props.CancelClicked()}>Sulje</Button>
-                <Button variant="primary" onClick={() => props.SaveClicked(name, alias, typeid, object)}>Tallenna</Button>
+                <Button variant="primary" onClick={() => props.SaveClicked(name, alias, typeid, object)}>{object ? "Tallenna muutos" : "Tallenna"}</Button>
             </Modal.Footer>
         </Modal>
-    )
-        
+    )       
     
+}
+
+const Error = (props) => {
+    const {message} = props;
+    const [show, setShow] = useState(true);
+
+    const handleClose = () => {
+        setShow(false);
+        props.setError(null);
+    } 
+
+    return (
+        <Modal size="sm" show={show} onHide={handleClose}>
+            <Modal.Header closeButton></Modal.Header>
+            <Modal.Body>
+                <Alert variant="warning" >
+                    <Alert.Heading>Virhe:</Alert.Heading>
+                    <p>
+                    {message}
+                    </p>
+                </Alert>
+            </Modal.Body>
+        </Modal>
+
+    )
 }
