@@ -2,7 +2,7 @@ const utils = require('./utils/dbutils');
 
 const fetchObservation = (id) => {    
 
-    let query = "SELECT k.nimi AS kohde, h.id, DATE_FORMAT(h.pvm, '%d.%m.%Y') AS pvm, h.valine, h.paikka, h.selite FROM havainto h ";
+    let query = "SELECT k.nimi AS kohde, h.kohde_id, h.id, h.pvm, h.valine, h.paikka, h.selite FROM havainto h ";
     query += "INNER JOIN kohde k ON h.kohde_id = k.id WHERE 1=1";
 
     if (id) {
@@ -21,9 +21,10 @@ const insertObservation = ({objectid, epoch_time_date, equipment, location, desc
 }
 
 const updateObservation = ({objectid, epoch_time_date, equipment, location, description}, id) => {
-    let query = "UPDATE  havainto SET kohde_id=?, pvm=FROM_UNIXTIME(?), valine=?, paikka=?, selite=? WHERE id = ?";
+    console.log();
+    let query = "UPDATE havainto SET kohde_id=?, pvm=FROM_UNIXTIME(?), valine=?, paikka=?, selite=? WHERE id = ?";
 
-    return utils.executeSQL(query, [objectid, epoch_time_date, equipment, location, description]);
+    return utils.executeSQL(query, [objectid, epoch_time_date, equipment, location, description, id]);
 }
 
 const deleteObservation = (id) => {

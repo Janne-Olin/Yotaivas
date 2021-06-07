@@ -18,6 +18,7 @@ export const Observations = () => {
     const [observationToBeUpdated, setObservationToBeUpdated] = useState(null)
     const [showForm, setShowForm] = useState(false);
     const [deleteId, setDeleteId] = useState(-1);
+    const [modifyId, setModifyId] = useState(-1);
 
 
     const SaveClicked = (date, equipment, location, description, objectid, observation) => {
@@ -34,6 +35,10 @@ export const Observations = () => {
     const CancelClicked = () => {
         setShowForm(false);
         setObservationToBeModified(null);
+    }
+
+    const OnEdit = (id) => {
+        setModifyId(id);
     }
 
     useEffect(() => {
@@ -92,13 +97,56 @@ export const Observations = () => {
         }
     }, [deleteId]);
 
+    useEffect(() => {
+        const fetchObservation = async () => {
+            let r = await fetch("http://localhost:3002/api/havainto/" + modifyId);
+            let data = await r.json();        
+
+            setObservationToBeModified(data.havainto[0]);
+        }
+
+        if (modifyId > 0) {
+            fetchObservation();
+            setShowForm(true);
+            setModifyId(-1);
+        }
+
+    }, [modifyId]);
+
+    useEffect(() => {
+        const updateObservation = async () => {
+            const r = await fetch("http://localhost:3002/api/havainto/" + observationToBeUpdated.id, {
+                method: "PUT",
+                headers : {
+                    'Content-type' : 'application/json'
+                },
+                body : JSON.stringify({date: observationToBeUpdated.date, equipment: observationToBeUpdated.equipment, 
+                    location: observationToBeUpdated.location, description: observationToBeUpdated.description, objectid: observationToBeUpdated.objectid})
+            });
+
+            if ( r.status == 204 ){
+                setShowForm(false);
+                setDoFetch(true);
+                setObservationToBeModified(null);
+            }
+            else {
+                let response = await r.json();
+                setError(response.message);
+            }
+        }
+
+        if (observationToBeUpdated) {
+            updateObservation();
+        }
+    }, [observationToBeUpdated]);
+
 
 
     return (
         <div>
             <Button variant="secondary" onClick={() => setShowForm(true)}>Lisää havainto</Button>
 
-            <ObservationsTable observations={observations} setDeleteId={setDeleteId}/>
+            <ObservationsTable observations={observations} setDeleteId={setDeleteId} OnEdit={OnEdit}/>
 
             {
                 showForm ? <ObservationForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} observation={observationToBeModified}/> : null
@@ -117,11 +165,11 @@ const ObservationsTable = (props) => {
         return (
             <tr>
                 <td>{o.kohde}</td>
-                <td>{o.pvm}</td>
+                <td>{new Date(o.pvm).toLocaleDateString('fi-FI')}</td>
                 <td>{o.valine}</td>
                 <td>{o.paikka}</td>
                 <td>{o.selite}</td>
-                <td><Button variant="link">Muokkaa</Button></td>
+                <td><Button variant="link" onClick={() => props.OnEdit(o.id)}>Muokkaa</Button></td>
                 <td><Button variant="link" onClick={() => props.setDeleteId(o.id)}>Poista</Button></td>
             </tr>
         );
@@ -167,7 +215,6 @@ const ObservationForm = (props) => {
             let data = await r.json();
 
             setObjects([{id: -1, kohde: "Valinta"}, ...data.kohteet]);
-            console.log(data);
         }
 
         fetchObjects();
@@ -175,10 +222,11 @@ const ObservationForm = (props) => {
 
     useEffect(() => {
         if (observation) {
-            setDate(observation.pvm);
+            console.log(observation.pvm);
+            setDate(new Date(observation.pvm));
             setEquipment(observation.valine);
             setLocation(observation.paikka);
-            setDescription(observation.description);
+            setDescription(observation.selite);
             setObjectid(observation.kohde_id);
         }
     }, [observation]);

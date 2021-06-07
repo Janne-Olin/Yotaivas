@@ -9,6 +9,7 @@ router.route('/api/havainto').
     post(ctrl.insert);
 
 router.route('/api/havainto/:id').
+    get(ctrl.fetchSingleObservation).
     put(ctrl.update).
     delete(ctrl.delete);
 

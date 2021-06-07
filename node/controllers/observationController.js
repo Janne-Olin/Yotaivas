@@ -15,6 +15,19 @@ module.exports = {
         }
     },
 
+    fetchSingleObservation: async (req, res) => {
+        try {
+            let id = req.params.id;
+
+            let h = await sql.fetch(id);
+            res.statusCode = 200;
+            res.json({status: "OK", havainto: h});
+        }
+        catch (err) {
+            utils.createErrorMessage(res, "Virhe: " + err.message);
+        }
+    },
+
     insert: async (req, res) => {
         try {
             const {objectid, date, equipment, location, description} = req.body;
