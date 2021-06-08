@@ -1,6 +1,23 @@
 const sql = require('../db/observationSQL');
 const utils = require('../db/utils/dbutils');
 
+const checkInputfieldsExists = (body) => {
+
+    const {objectid, date, equipment, location, description} = body;
+
+    let errors = [];
+    if (!date) errors.push("päivämäärä");
+    if (!equipment || equipment == "") errors.push("väline");
+    if (!location || location == "") errors.push("paikka");
+    if (!description || description == "") errors.push("selite");
+    if (!objectid || objectid < 0) errors.push("kohde")
+
+    if (errors.length > 0)
+        return errors.join(",");
+    else
+        return null;
+}
+
 module.exports = {
 
 
@@ -30,6 +47,13 @@ module.exports = {
 
     insert: async (req, res) => {
         try {
+            const checkErrors = checkInputfieldsExists(req.body);
+
+            if (checkErrors) {
+                utils.createErrorMessage(res, "Pakollisia tietoja puuttuu: " + checkErrors);
+                return;
+            }
+
             const {objectid, date, equipment, location, description} = req.body;
 
             const epoch_time_date = new Date(date).valueOf() / 1000;
@@ -48,6 +72,13 @@ module.exports = {
 
     update: async (req, res) => {
         try {
+            const checkErrors = checkInputfieldsExists(req.body);
+
+            if (checkErrors) {
+                utils.createErrorMessage(res, "Pakollisia tietoja puuttuu: " + checkErrors);
+                return;
+            }
+
             const {objectid, date, equipment, location, description} = req.body;
             const id = req.params.id;
 
