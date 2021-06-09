@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav } from 'react-bootstrap';
 
@@ -21,6 +21,7 @@ function App() {
         <Switch>
           <Route exact path="/havainto" component={Observations} />
           <Route exact path="/kohde" component={SkyObjects} />
+          <Redirect exact from="/" to="/havainto" />
         </Switch>
 
     </Router>

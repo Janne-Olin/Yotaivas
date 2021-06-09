@@ -9,8 +9,6 @@ const fetchObservation = (id) => {
         query += " AND h.id = ?"
     }
 
-    query += " ORDER BY h.pvm";
-
     return utils.executeSQL(query, [id]);
 }
 

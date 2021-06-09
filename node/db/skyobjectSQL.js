@@ -9,8 +9,6 @@ const fetchObject = (id) => {
         query += " AND k.id = ?"
     }
 
-    query += " ORDER BY k.nimi";
-
     return utils.executeSQL(query, [id]);
 }
 

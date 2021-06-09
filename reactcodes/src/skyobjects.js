@@ -12,6 +12,7 @@ export const SkyObjects = () => {
     const [modifyId, setModifyId] = useState(-1);
     const [deleteId, setDeleteId] = useState(-1);
     const [error, setError] = useState(null);
+    const [sortType, setSortType] = useState(null);
 
     const SaveClicked = (name, alias, typeid, object) => {
         if (object) {
@@ -39,6 +40,7 @@ export const SkyObjects = () => {
             
             setObjects(data.kohteet);
             setDoFetch(false);
+            setSortType("kohde");
         }
 
         if (doFetch) {
@@ -131,12 +133,22 @@ export const SkyObjects = () => {
         }
     }, [deleteId]);
 
+    useEffect(() => {
+        const sortArray = () => {
+            const sorted = [...objects].sort((a, b) => a[sortType].localeCompare(b[sortType], undefined, {numeric: true, sensitivity: 'base'})  );
+            setObjects(sorted);
+            setSortType(null);
+        }
+    
+        if (sortType) sortArray();
+      }, [sortType]);
+
 
     return (
         <div>
             <Button variant="secondary" onClick={() => setShowForm(true)}>Lisää uusi kohde</Button>
 
-            <ObjectsTable objects={objects} OnEdit={OnEdit} setDeleteId={setDeleteId}/>
+            <ObjectsTable objects={objects} OnEdit={OnEdit} setDeleteId={setDeleteId} setSortType={setSortType}/>
 
             {
                 showForm ? <ObjectForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} object={objectToBeModified}/> : null
@@ -153,7 +165,7 @@ const ObjectsTable = (props) => {
     const data = props.objects.map((o, i) => {
 
         return (
-            <tr>
+            <tr key={i}>
                 <td>{o.kohde}</td>
                 <td>{o.alias ? o.alias : ""}</td>
                 <td>{o.tyyppi}</td>
@@ -169,9 +181,9 @@ const ObjectsTable = (props) => {
             <Table>
                 <thead>
                     <tr>
-                        <th>Kohde</th>
-                        <th>Alias</th>
-                        <th>Tyyppi</th>
+                        <th><a href="#" onClick={() => props.setSortType("kohde")}>Kohde</a></th>
+                        <th><a href="#" onClick={() => props.setSortType("alias")}>Alias</a></th>
+                        <th><a href="#" onClick={() => props.setSortType("tyyppi")}>Tyyppi</a></th>
                         <th></th>
                         <th></th>
                         <th></th>

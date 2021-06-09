@@ -19,6 +19,7 @@ export const Observations = () => {
     const [showForm, setShowForm] = useState(false);
     const [deleteId, setDeleteId] = useState(-1);
     const [modifyId, setModifyId] = useState(-1);
+    const [sortType, setSortType] = useState(null);
 
 
     const SaveClicked = (date, equipment, location, description, objectid, observation) => {
@@ -48,6 +49,7 @@ export const Observations = () => {
 
             setObservations(data.havainnot);
             setDoFetch(false);
+            setSortType("pvm");
         }
 
         if (doFetch) {
@@ -140,13 +142,23 @@ export const Observations = () => {
         }
     }, [observationToBeUpdated]);
 
+    useEffect(() => {
+        const sortArray = () => {
+            const sorted = [...observations].sort((a, b) => a[sortType].localeCompare(b[sortType], undefined, {numeric: true, sensitivity: 'base'})  );
+            setObservations(sorted);
+            setSortType(null);
+        }
+    
+        if (sortType) sortArray();
+      }, [sortType]);
+
 
 
     return (
         <div>
             <Button variant="secondary" onClick={() => setShowForm(true)}>Lisää havainto</Button>
 
-            <ObservationsTable observations={observations} setDeleteId={setDeleteId} OnEdit={OnEdit}/>
+            <ObservationsTable observations={observations} setDeleteId={setDeleteId} OnEdit={OnEdit} setSortType={setSortType}/>
 
             {
                 showForm ? <ObservationForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} observation={observationToBeModified}/> : null
@@ -163,7 +175,7 @@ const ObservationsTable = (props) => {
 
     const data = props.observations.map((o, i) => {
         return (
-            <tr>
+            <tr key={i}>
                 <td>{o.kohde}</td>
                 <td>{new Date(o.pvm).toLocaleDateString('fi-FI')}</td>
                 <td>{o.valine}</td>
@@ -180,10 +192,10 @@ const ObservationsTable = (props) => {
             <Table>
                 <thead>
                     <tr>
-                        <th>Kohde</th>
-                        <th>Päivämäärä</th>
-                        <th>Väline</th>
-                        <th>Paikka</th>
+                        <th><a href="#" onClick={() => props.setSortType("kohde")}>Kohde</a></th>
+                        <th><a href="#" onClick={() => props.setSortType("pvm")}>Päivämäärä</a></th>
+                        <th><a href="#" onClick={() => props.setSortType("valine")}>Väline</a></th>
+                        <th><a href="#" onClick={() => props.setSortType("paikka")}>Paikka</a></th>
                         <th>Selite</th>
                         <th></th>
                         <th></th>
@@ -206,6 +218,7 @@ const ObservationForm = (props) => {
     const [location, setLocation] = useState("");
     const [description, setDescription] = useState("");
     const [objectid, setObjectid] = useState(-1);
+    const [objSortType, setObjSortType] = useState(null);
 
     const show = true;
 
@@ -215,6 +228,7 @@ const ObservationForm = (props) => {
             let data = await r.json();
 
             setObjects([{id: -1, kohde: "Valinta"}, ...data.kohteet]);
+            setObjSortType("kohde");
         }
 
         fetchObjects();
@@ -230,6 +244,15 @@ const ObservationForm = (props) => {
             setObjectid(observation.kohde_id);
         }
     }, [observation]);
+
+    useEffect(() => {
+        const sortArray = () => {
+            const sorted = [...objects].sort((a, b) => a[objSortType].localeCompare(b[objSortType], undefined, {numeric: true, sensitivity: 'base'})  );
+            setObjects(sorted);
+        }
+    
+        if (objSortType) sortArray();
+      }, [objSortType]);
 
     const objectData = objects.map((o, i) => {
         return (
