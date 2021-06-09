@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Modal, Form } from 'react-bootstrap';
+import { Button, Table, Modal, Form, Container, Row, Col } from 'react-bootstrap';
 import { Error } from './error.js';
+import './style.css';
 
 export const SkyObjects = () => {
     const [objects, setObjects] = useState([]);
@@ -145,10 +146,14 @@ export const SkyObjects = () => {
 
 
     return (
-        <div>
-            <Button variant="secondary" onClick={() => setShowForm(true)}>Lisää uusi kohde</Button>
+        <Container fluid>
+            <Button className="item" variant="secondary" onClick={() => setShowForm(true)}>Lisää uusi kohde</Button>
 
-            <ObjectsTable objects={objects} OnEdit={OnEdit} setDeleteId={setDeleteId} setSortType={setSortType}/>
+            <Row className="justify-content-md-left">
+                <Col md={{ span: 10 }}>
+                    <ObjectsTable objects={objects} OnEdit={OnEdit} setDeleteId={setDeleteId} setSortType={setSortType}/>
+                </Col>
+            </Row> 
 
             {
                 showForm ? <ObjectForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} object={objectToBeModified}/> : null
@@ -156,7 +161,7 @@ export const SkyObjects = () => {
             {
                 error ? <Error message={error} setError={setError} /> : null
             }
-        </div>
+        </Container>
     );
 }
 
@@ -171,20 +176,18 @@ const ObjectsTable = (props) => {
                 <td>{o.tyyppi}</td>
                 <td><Button variant="link" onClick={() => props.OnEdit(o.id)}>Muokkaa</Button></td>
                 <td><Button variant="link" onClick={() => props.setDeleteId(o.id)}>Poista</Button></td>
-                <td><Button variant="link">Lisää havainto</Button></td>
             </tr>
         );
     });
 
     return (
         <div>
-            <Table>
+            <Table striped bordered hover size="sm" lg="auto">
                 <thead>
                     <tr>
                         <th><a href="#" onClick={() => props.setSortType("kohde")}>Kohde</a></th>
                         <th><a href="#" onClick={() => props.setSortType("alias")}>Alias</a></th>
                         <th><a href="#" onClick={() => props.setSortType("tyyppi")}>Tyyppi</a></th>
-                        <th></th>
                         <th></th>
                         <th></th>
                     </tr>

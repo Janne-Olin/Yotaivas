@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Button, Table, Modal, Form } from 'react-bootstrap';
+import { Button, Table, Modal, Form, Container, Col, Row } from 'react-bootstrap';
 
 import { Error } from './error.js';
+import './style.css';
 
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
 import fi from 'date-fns/locale/fi';
 registerLocale('fi', fi)
+
+const sortArray = (array, sortType) => {
+    const sorted = [...array].sort((a, b) => a[sortType].localeCompare(b[sortType], undefined, {numeric: true, sensitivity: 'base'})  );
+    return sorted;
+}
 
 export const Observations = () => {
     const [doFetch, setDoFetch] = useState(true);
@@ -20,6 +26,9 @@ export const Observations = () => {
     const [deleteId, setDeleteId] = useState(-1);
     const [modifyId, setModifyId] = useState(-1);
     const [sortType, setSortType] = useState(null);
+    const [object, setObject] = useState(-1);
+    const [objectList, setObjectList] = useState([]);
+    const [objListSortType, setObjListSortType] = useState(null);
 
 
     const SaveClicked = (date, equipment, location, description, objectid, observation) => {
@@ -41,6 +50,21 @@ export const Observations = () => {
     const OnEdit = (id) => {
         setModifyId(id);
     }
+
+    const ObjectSelected = (e) => {
+        setObject(e.target.value);
+    }
+
+    useEffect(() => {
+        const fetchObjectList = async () => {
+            const r = await fetch("http://localhost:3002/api/kohde");
+            const data = await r.json();
+            console.log(data.kohteet);
+            setObjectList([{ id: -1, kohde: "--Valitse--" }, ...data.kohteet]);
+            setObjListSortType("kohde");
+        }
+        fetchObjectList();
+    }, []);
 
     useEffect(() => {
         const fetchObserations = async () => {
@@ -142,31 +166,47 @@ export const Observations = () => {
         }
     }, [observationToBeUpdated]);
 
-    useEffect(() => {
-        const sortArray = () => {
-            const sorted = [...observations].sort((a, b) => a[sortType].localeCompare(b[sortType], undefined, {numeric: true, sensitivity: 'base'})  );
-            setObservations(sorted);
-            setSortType(null);
-        }
-    
-        if (sortType) sortArray();
+    useEffect(() => {    
+        if (sortType) setObservations(sortArray(observations, sortType));
+
       }, [sortType]);
+
+    useEffect(() => {
+        if (objectList.length > 0) setObjectList(sortArray(objectList, objListSortType));
+
+    }, [objListSortType]);
+
+      const objectSelection = objectList.map((o, i) => {
+        return <option key={i} value={o.id}>{o.kohde}</option>
+    })
 
 
 
     return (
-        <div>
-            <Button variant="secondary" onClick={() => setShowForm(true)}>Lisää havainto</Button>
+        <Container fluid>
+            <Form.Label className="item">Suodata kohteen mukaan:</Form.Label>  
+                <Col xs lg={2}>      
+                    <Form.Group>                        
+                        <Form.Control className="item" as="select" value={object} onChange={(e) => ObjectSelected(e)}>
+                            {objectSelection}
+                        </Form.Control>
+                    </Form.Group>             
+                   
+                </Col>
+            <Button className="item" variant="secondary" onClick={() => setShowForm(true)}>Lisää havainto</Button>
 
-            <ObservationsTable observations={observations} setDeleteId={setDeleteId} OnEdit={OnEdit} setSortType={setSortType}/>
-
+            <Row className="justify-content-md-left">
+                <Col md={{ span: 10 }}>
+                    <ObservationsTable observations={observations} setDeleteId={setDeleteId} OnEdit={OnEdit} setSortType={setSortType} object={object}/>
+                </Col>
+            </Row>   
             {
                 showForm ? <ObservationForm SaveClicked={SaveClicked} CancelClicked={CancelClicked} observation={observationToBeModified}/> : null
             } 
             {
                 error ? <Error message={error} setError={setError} /> : null
             }
-        </div>
+        </Container>
         
     );
 }
@@ -187,9 +227,25 @@ const ObservationsTable = (props) => {
         );
     });
 
+    const filteredTable = props.observations.filter(o => o.kohde_id == props.object);
+
+    const filtereddata = filteredTable.map((o, i) => {
+        return (
+            <tr key={i}>
+                <td>{o.kohde}</td>
+                <td>{new Date(o.pvm).toLocaleDateString('fi-FI')}</td>
+                <td>{o.valine}</td>
+                <td>{o.paikka}</td>
+                <td>{o.selite}</td>
+                <td><Button variant="link" onClick={() => props.OnEdit(o.id)}>Muokkaa</Button></td>
+                <td><Button variant="link" onClick={() => props.setDeleteId(o.id)}>Poista</Button></td>
+            </tr>
+        );
+    });
+
     return (
         <div>
-            <Table>
+            <Table striped bordered hover size="sm" lg="auto">
                 <thead>
                     <tr>
                         <th><a href="#" onClick={() => props.setSortType("kohde")}>Kohde</a></th>
@@ -202,7 +258,7 @@ const ObservationsTable = (props) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {data}
+                    {props.object > 0 ? filtereddata : data}
                 </tbody>
             </Table>
         </div>
@@ -245,13 +301,9 @@ const ObservationForm = (props) => {
         }
     }, [observation]);
 
-    useEffect(() => {
-        const sortArray = () => {
-            const sorted = [...objects].sort((a, b) => a[objSortType].localeCompare(b[objSortType], undefined, {numeric: true, sensitivity: 'base'})  );
-            setObjects(sorted);
-        }
-    
-        if (objSortType) sortArray();
+    useEffect(() => {    
+        if (objSortType) setObjects(sortArray(objects, objSortType));
+
       }, [objSortType]);
 
     const objectData = objects.map((o, i) => {
