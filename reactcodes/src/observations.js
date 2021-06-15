@@ -11,6 +11,7 @@ import fi from 'date-fns/locale/fi';
 registerLocale('fi', fi)
 
 const sortArray = (array, sortType) => {
+    // Asetetaan tyyppi, jonka mukaan taulukko lajitellaan
     const sorted = [...array].sort((a, b) => a[sortType].localeCompare(b[sortType], undefined, {numeric: true, sensitivity: 'base'})  );
     return sorted;
 }
@@ -56,6 +57,7 @@ export const Observations = () => {
     }
 
     useEffect(() => {
+        // Haetaan kohteet alasvetovalikkoon
         const fetchObjectList = async () => {
             const r = await fetch("http://localhost:3002/api/kohde");
             const data = await r.json();
@@ -67,6 +69,7 @@ export const Observations = () => {
     }, []);
 
     useEffect(() => {
+        // Haetaan havainnot taulukkoon
         const fetchObserations = async () => {
             let r = await fetch("http://localhost:3002/api/havainto");
             let data = await r.json();
@@ -83,6 +86,7 @@ export const Observations = () => {
     }, [doFetch]);
 
     useEffect(() => {
+        // Uuden havainnon lisääminen
         const insertObservation = async () => {
             const r = await fetch("http://localhost:3002/api/havainto", {
                 method: "POST",
@@ -109,6 +113,7 @@ export const Observations = () => {
     }, [observationToBeInserted]);
 
     useEffect(() => {
+        // Havainnon poisto
         const deleteObservation = async () => {
             const r = await fetch("http://localhost:3002/api/havainto/" + deleteId, {
                 method: "DELETE"
@@ -124,6 +129,7 @@ export const Observations = () => {
     }, [deleteId]);
 
     useEffect(() => {
+        // Haetaan havainto jota halutaan muokata
         const fetchObservation = async () => {
             let r = await fetch("http://localhost:3002/api/havainto/" + modifyId);
             let data = await r.json();        
@@ -140,6 +146,7 @@ export const Observations = () => {
     }, [modifyId]);
 
     useEffect(() => {
+        // Havainnon päivitys
         const updateObservation = async () => {
             const r = await fetch("http://localhost:3002/api/havainto/" + observationToBeUpdated.id, {
                 method: "PUT",
@@ -227,6 +234,7 @@ const ObservationsTable = (props) => {
         );
     });
 
+    // Taulukon suodatus, jos alasvetovalikosta ollaan valittu kohde
     const filteredTable = props.observations.filter(o => o.kohde_id == props.object);
 
     const filtereddata = filteredTable.map((o, i) => {
@@ -279,6 +287,7 @@ const ObservationForm = (props) => {
     const show = true;
 
     useEffect(() => {
+        // Kohteiden haku alasvetovalikkoon
         const fetchObjects = async () => {
             let r = await fetch("http://localhost:3002/api/kohde");
             let data = await r.json();
@@ -291,6 +300,7 @@ const ObservationForm = (props) => {
     }, []);
 
     useEffect(() => {
+         // Tarkistetaan ollaanko muokkaamassa havaintoa. Jos ollaan -> laitetaan arvot kenttiin
         if (observation) {
             console.log(observation.pvm);
             setDate(new Date(observation.pvm));

@@ -34,7 +34,8 @@ export const SkyObjects = () => {
         setModifyId(id);
     }
 
-    useEffect(() => {
+    useEffect(() => {   
+        // Haetaan kohteet listalle     
         const fetchObjects = async () => {
             let r = await fetch("http://localhost:3002/api/kohde");
             let data = await r.json();
@@ -51,6 +52,7 @@ export const SkyObjects = () => {
     }, [doFetch])
 
     useEffect(() => {
+        // Kohteen lisäys
         const insertObject = async () => {
             const r = await fetch("http://localhost:3002/api/kohde", {
                 method: "POST",
@@ -77,6 +79,7 @@ export const SkyObjects = () => {
     }, [objectToBeInserted]);
 
     useEffect(() => {
+        // Haetaan kohde, jota halutaan muokata
         const fetchObject = async () => {
             let r = await fetch("http://localhost:3002/api/kohde/" + modifyId);
             let data = await r.json();            
@@ -93,6 +96,7 @@ export const SkyObjects = () => {
     }, [modifyId]);
 
     useEffect(() => {
+        // Muokattavan kohteen päivitys
         const updateObject = async () => {
             const r = await fetch("http://localhost:3002/api/kohde/" + objectToBeUpdated.id, {
                 method: "PUT",
@@ -120,6 +124,7 @@ export const SkyObjects = () => {
     }, [objectToBeUpdated]);
 
     useEffect(() => {
+        // Kohteen poisto
         const deleteObject = async () => {
             const r = await fetch("http://localhost:3002/api/kohde/" + deleteId, {
                 method: "DELETE"
@@ -135,6 +140,7 @@ export const SkyObjects = () => {
     }, [deleteId]);
 
     useEffect(() => {
+        // Asetetaan tyyppi, jonka mukaan taulukko lajitellaan
         const sortArray = () => {
             const sorted = [...objects].sort((a, b) => a[sortType].localeCompare(b[sortType], undefined, {numeric: true, sensitivity: 'base'})  );
             setObjects(sorted);
@@ -211,6 +217,7 @@ const ObjectForm = (props) => {
     const show = true;
 
     useEffect(() => {
+        // Haetaan kohdetyypit alasvetovalikkoon
         const fetchTypes = async () => {
             let r = await fetch("http://localhost:3002/api/tyyppi");
             let data = await r.json();
@@ -222,6 +229,7 @@ const ObjectForm = (props) => {
     }, []);
 
     useEffect(() => {
+        // Tarkistetaan ollaanko muokkaamassa kohdetta. Jos ollaan -> laitetaan arvot kenttiin
         if (object) {
             setName(object.kohde);
             setAlias(object.alias);
