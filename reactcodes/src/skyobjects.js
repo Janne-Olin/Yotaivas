@@ -3,6 +3,16 @@ import { Button, Table, Modal, Form, Container, Row, Col } from 'react-bootstrap
 import { Error } from './error.js';
 import './style.css';
 
+const doSearchQuery = (name, alias, typeid) => {
+    let r = [];
+    if (name != '') r.push("name=" + name);
+    if (alias != '') r.push("alias=" + alias);
+    if (typeid != '-1') r.push("typeid=" + typeid);
+    r.push(Date.now());
+
+    return r.join("&");
+}
+
 export const SkyObjects = () => {
     const [objects, setObjects] = useState([]);
     const [doFetch, setDoFetch] = useState(true);
@@ -14,6 +24,11 @@ export const SkyObjects = () => {
     const [deleteId, setDeleteId] = useState(-1);
     const [error, setError] = useState(null);
     const [sortType, setSortType] = useState(null);
+    const [query, setQuery] = useState('');
+    const [types, setTypes] = useState([]);
+    const [name, setName] = useState('');
+    const [alias, setAlias] = useState('');
+    const [typeid, setTypeid] = useState(-1);
 
     const SaveClicked = (name, alias, typeid, object) => {
         if (object) {
@@ -34,10 +49,27 @@ export const SkyObjects = () => {
         setModifyId(id);
     }
 
+    const searchClicked = () => {
+        setQuery(doSearchQuery(name, alias, typeid));
+        setDoFetch(true);
+    }
+
+    useEffect(() => {
+        // Haetaan kohdetyypit alasvetovalikkoon
+        const fetchTypes = async () => {
+            let r = await fetch("http://localhost:3002/api/tyyppi");
+            let data = await r.json();
+
+            setTypes([{id: -1, nimi: "Valinta"}, ...data.tyypit]);
+        }
+
+        fetchTypes();
+    }, []);
+
     useEffect(() => {   
         // Haetaan kohteet listalle     
         const fetchObjects = async () => {
-            let r = await fetch("http://localhost:3002/api/kohde");
+            let r = await fetch("http://localhost:3002/api/kohde?" + query);
             let data = await r.json();
             
             setObjects(data.kohteet);
@@ -150,10 +182,31 @@ export const SkyObjects = () => {
         if (sortType) sortArray();
       }, [sortType]);
 
+      const objectTypes = types.map((t, i) => {
+        return (
+            <option value={t.id} key={t.id}>{t.nimi}</option>
+        );        
+    });
+
+
 
     return (
         <Container fluid>
             <Button className="item" variant="secondary" onClick={() => setShowForm(true)}>Lisää uusi kohde</Button>
+
+            <Row className="justify-content-md-left">
+                <Col md={{ span: 3 }}>
+                    <Form className="item">
+                        <Form.Control size="sm" type="text" placeholder="Nimi" value={name} onChange={e => setName(e.target.value)} />
+                        <Form.Control size="sm" type="text" placeholder="Alias" value={alias} onChange={e => setAlias(e.target.value)}/>
+                        <Form.Control size="sm" as="select" value={typeid} onChange={(e) => setTypeid(e.target.value)}>
+                            {objectTypes}
+                        </Form.Control>                
+
+                        <Button variant="secondary" onClick={() => searchClicked()}>Hae</Button>
+                    </Form> 
+                </Col>
+            </Row>            
 
             <Row className="justify-content-md-left">
                 <Col md={{ span: 10 }}>
@@ -240,8 +293,7 @@ const ObjectForm = (props) => {
     const objectTypes = types.map((t, i) => {
         return (
             <option value={t.id} key={t.id}>{t.nimi}</option>
-        );
-        
+        );        
     });
 
     return (

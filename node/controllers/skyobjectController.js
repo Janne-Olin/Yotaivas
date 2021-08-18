@@ -20,7 +20,9 @@ module.exports = {
 
     fetch: async (req, res) => {
         try {
-            let k = await sql.fetch(null);
+            const {name, alias, typeid} = req.query;            
+
+            let k = await sql.fetch(null, {name, alias, typeid});
             res.statusCode = 200;
             res.json({status: "OK", kohteet: k});
         }
@@ -33,7 +35,7 @@ module.exports = {
         try {
             let id = req.params.id;
 
-            let k = await sql.fetch(id);
+            let k = await sql.fetch(id, {name: null, alias: null, typeid: null});
             res.statusCode = 200;
             res.json({status: "OK", kohde: k});
         }

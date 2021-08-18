@@ -1,15 +1,34 @@
 const utils = require('./utils/dbutils');
 
-const fetchObject = (id) => {    
+const fetchObject = (id, {name, alias, typeid}) => {   
+     
 
     let query = "SELECT k.id, k.nimi AS kohde, k.alias, k.tyyppi_id, t.nimi AS tyyppi FROM kohde k";
     query += " INNER JOIN kohdetyyppi t ON k.tyyppi_id = t.id WHERE 1=1";
 
+    let vars = [];
+
     if (id) {
-        query += " AND k.id = ?"
+        query += " AND k.id = ?";
+        vars.push(id);
     }
 
-    return utils.executeSQL(query, [id]);
+    if (name) {
+        query += " AND k.nimi like ?";
+        vars.push(name + "%");
+    }
+
+    if (alias) {
+        query += " AND k.alias like ?";
+        vars.push(alias + "%");
+    }
+
+    if (typeid > 0) {
+        query += " AND k.tyyppi_id = ?";
+        vars.push(typeid);
+    }   
+
+    return utils.executeSQL(query, vars);
 }
 
 const insertObject = ({name, alias, typeid}) => {
@@ -32,8 +51,8 @@ const deleteObject = (id) => {
 
 module.exports = {
 
-    fetch : (id) => {
-        return fetchObject(id);
+    fetch : (id, {name, alias, typeid}) => {
+        return fetchObject(id, {name, alias, typeid});
     },
 
     insert : ({name, alias, typeid}) => {
